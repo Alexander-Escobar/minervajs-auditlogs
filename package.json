@@ -1,6 +1,6 @@
 {
-  "name": "minervajs-auditlogs",
-  "version": "1.0.2",
+  "name": "@minervajs/auditlogs",
+  "version": "1.0.0",
   "description": "Servicio de Registros de consola, es un módulo de gestión de mensajes para su uso en auditoria, depuración, informativos, avisos y error.",
   "main": "src/app.js",
   "scripts": {
