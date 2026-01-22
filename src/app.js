@@ -1,7 +1,7 @@
 /** @module Audit_Logs */
 const fs = require('node:fs/promises');
 const path = require('node:path');
-const fetch = global.fetch;
+const fetch = global.fetch || require('node-fetch');
 
 
 // Códigos de escape ANSI para colores
@@ -37,7 +37,7 @@ const AUDIT_LEVELS = {
  * Clase Audit_Logs personalizada que permite registrar mensajes en la consola con colores
  * por nivel y también guardarlos en archivos de log rotativos basados en el número de líneas.
  */
-class Audit_Logs 
+class AuditLogs 
 {
   /**
    * Crea una instancia del Audit_Logs.
@@ -55,7 +55,7 @@ class Audit_Logs
 	* Configuración de auditoría
 	*/
 	this.auditConfig = options?.audit ?? {};
-	this.minAuditLevel = AUDIT_LEVELS[config?.audit?.minAuditLevel] ?? AUDIT_LEVELS.LOW;
+	this.minAuditLevel = AUDIT_LEVELS[this.auditConfig?.minAuditLevel] ?? AUDIT_LEVELS.LOW;
 	
 	/**
 	* Configuración de Webhook
@@ -90,7 +90,7 @@ class Audit_Logs
      * Indica si se realizaran escrituras en modo depuracion, esto permite adicionar caracteristicas de depuracion, como maxLines < 100 lineas.
      * @type {boolean}
      */
-	this.debuger = options?.debuger ?? false;
+	this.debugger = options?.debuger ?? false;
 
     /**
      * El número máximo de líneas por archivo de log antes de la rotación.
@@ -98,7 +98,7 @@ class Audit_Logs
      * @type {number}
      */
 	this.maxLines = options?.maxLines ?? 10000;
-	if (this.maxLines < 100 && this.debuger === false)
+	if (this.maxLines < 100 && this.debugger === false)
 	{ this.maxLines = 100; }
 
     /**
@@ -288,7 +288,7 @@ class Audit_Logs
     }
 	else
 	{
-		l_formatted = l_formatted = l_formatted.replace('%colorbegin%', colores.gris);
+		l_formatted = l_formatted.replace('%colorbegin%', colores.gris);
 		l_formatted = l_formatted.replace('%colorend%', colores.reset);
 	}
 	
@@ -356,8 +356,12 @@ class Audit_Logs
    *
    * @param {Object} data - Información de auditoría
    */
-  audit(data = {}) 
+  async audit(data = {}) 
   {
+	if (typeof data !== 'object') 
+	{ throw new Error('audit() requiere un objeto como parámetro'); }
+
+	const level = data.level ?? 'MEDIUM';
 	const eventLevelValue = AUDIT_LEVELS[level];
 	
 	if (!eventLevelValue) 
@@ -369,20 +373,7 @@ class Audit_Logs
 	if (eventLevelValue < this.minAuditLevel) 
 	{
 		return; // evento ignorado silenciosamente
-	}
-	
-    if (typeof data !== 'object') 
-	{
-      throw new Error('audit() requiere un objeto como parámetro');
-    }
-	
-    const level = data.level ?? AUDIT_LEVELS.MEDIUM;
-
-    if (!Object.values(AUDIT_LEVELS).includes(level)) 
-	{
-      throw new Error(`Nivel de auditoría inválido: ${level}`);
-    }
-	
+	}	
 
 
   /**
@@ -430,7 +421,7 @@ class Audit_Logs
 	
 	if (this.webhook.levels.includes(level)) 
 	{
-		this.sendWebhook({
+		await this.sendWebhook({
 			schemaVersion: '1.0',
 			source: 'MinervaJS.AuditLogs',
 			service: this.prefijo,
@@ -523,7 +514,7 @@ class Audit_Logs
 
 
 
-module.exports = Audit_Logs;
+module.exports = AuditLogs;
 
 // {
 //   getInstance: (prefijo, filenameBase, useColors, maxLines, writeToDisk) => {

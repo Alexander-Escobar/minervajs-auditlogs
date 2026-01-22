@@ -22,6 +22,7 @@ npm install @minervajs/auditlogs
 ```
 
 En la instalacion, puedes hacer uso del archivo muestra que esta en \node_modules\minervajs-auditlogs\example\index.js
+
 ---
 
 ## 🧠 Conceptos fundamentales
@@ -82,6 +83,7 @@ const audit = new AuditLogs('MiAplicacion', {
 ```
 
 El primer parámetro es el **prefijo**, usado para identificar la fuente del log, Reemplaza 'MiAplicacion' con un prefijo descriptivo para tu aplicación o módulo para identificar la fuente. Por defecto es 'AuditLogs' si se omitiera.
+
 ---
 ## Parámetros de Configuración.
 
@@ -320,10 +322,3 @@ Pendiente de implementación con Jest.
 ## 📄 Licencia
 
 BSD-2-Clause
-
----
-
-## ✍️ Autor
-
-**Alexander Enrique Escobar**
-Proyecto MinervaJS
