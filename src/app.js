@@ -149,6 +149,15 @@ class AuditLogs
 	this.start(`Uso de Color:       ${this.useColors}`);
 	this.start(`Max Lineas:         ${this.maxLines}`);
 	this.start(`Escritura a Disco:  ${this.writeToDisk}`);
+	
+	
+	this.alerts = {
+		enabled: this.auditConfig?.alerts?.enabled ?? false,
+		levels: this.auditConfig?.alerts?.levels ?? ['CRITICAL'],
+		handlers: this.auditConfig?.alerts?.handlers ?? []
+	};
+
+	
   }
 
   /**
@@ -419,6 +428,17 @@ class AuditLogs
 	// Usamos el motor existente
 	this.log('audit', JSON.stringify(auditEvent));
 	
+	if ( this.alerts.enabled && this.alerts.levels.includes(level))
+	{
+		for (const handler of this.alerts.handlers) 
+		{
+			try 
+			{ await handler(auditEvent); } 
+			catch (err) 
+			{ this.error(`Alert handler error: ${err.message}`); }
+		}
+	}
+
 	if (this.webhook.levels.includes(level)) 
 	{
 		await this.sendWebhook({
